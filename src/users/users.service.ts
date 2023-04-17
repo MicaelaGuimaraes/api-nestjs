@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Users } from 'src/typeorm/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUsersDto } from './dto/create-users.dto';
 import { ListUsersDto } from './dto/list-users-dto';
+import { CreateUsersDto } from './dto/create-users.dto';
 
 @Injectable()
 export default class UsersService {
@@ -13,14 +13,18 @@ export default class UsersService {
   ) {}
 
   async getAllUser(): Promise<ListUsersDto[]> {
-    return await this.usersRepository.find({
+    const response = await this.usersRepository.find({
       select: { id: true, name: true },
     });
+
+    if (!response.length) throw new NotFoundException('List of empty.');
+    return response;
   }
 
   async getUser(id: number): Promise<ListUsersDto[]> {
+    // return await this.usersRepository.findOneBy({ id: id });
     return await this.usersRepository.find({
-      select: { name: true },
+      select: { id: true, name: true },
       where: { id: id },
     });
   }
